@@ -1,7 +1,6 @@
 package com;
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 
 public class Demo {
     private static Logger logger = Logger.getLogger(Demo.class);

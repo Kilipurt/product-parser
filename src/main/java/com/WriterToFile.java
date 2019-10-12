@@ -1,7 +1,6 @@
 package com;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
