@@ -16,6 +16,7 @@ public class Demo {
         } catch (Exception e) {
             logger.error("Catch error in main. " + e.getMessage());
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
         System.out.println("Amount of extracted products: " + WriterToFile.getAmountOfProducts());

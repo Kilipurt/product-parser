@@ -32,20 +32,20 @@ public class Parser {
                 endFlag = false;
             }
 
-            JSONArray result = new JSONArray();
+            List<Product> result = new ArrayList<>();
 
             for (int i = 0; i < products.length(); i++) {
                 JSONObject productJSON = products.getJSONObject(i);
-                JSONObject productResult = new JSONObject();
+                Product productResult = new Product();
                 parseProduct(productResult, productJSON);
-                result.put(productResult);
+                result.add(productResult);
             }
 
             WriterToFile.writeToFile(result);
         }
     }
 
-    private void parseProduct(JSONObject productResult, JSONObject productJSON) {
+    private void parseProduct(Product productResult, JSONObject productJSON) {
         logger.info("parseProduct() method was called");
 
         parseArticleId(productResult, productJSON);
@@ -66,7 +66,7 @@ public class Parser {
         parsePriceRange(productResult, productJSON);
     }
 
-    private void parseSizes(JSONObject productResult, JSONArray variants) {
+    private void parseSizes(Product productResult, JSONArray variants) {
         logger.info("parseSizes() method was called");
 
         List<String> sizes = new ArrayList<>();
@@ -88,10 +88,10 @@ public class Parser {
             }
         }
 
-        productResult.put("sizes", sizes);
+        productResult.setSizes(sizes.toArray(new String[sizes.size()]));
     }
 
-    private void parsePriceRange(JSONObject productResult, JSONObject productJSON) {
+    private void parsePriceRange(Product productResult, JSONObject productJSON) {
         logger.info("parsePriceRange() method was called");
 
         if (productJSON.has("priceRange")) {
@@ -99,47 +99,47 @@ public class Parser {
 
             if (priceRange.has("min")) {
                 JSONObject minPrice = priceRange.getJSONObject("min");
-                productResult.put("minPrice", parsePrice(minPrice));
+                productResult.setMinPrice(parsePrice(minPrice));
             }
 
             if (priceRange.has("max")) {
                 JSONObject maxPrice = priceRange.getJSONObject("max");
-                productResult.put("maxPrice", parsePrice(maxPrice));
+                productResult.setMaxPrice(parsePrice(maxPrice));
             }
         }
     }
 
-    private JSONObject parsePrice(JSONObject price) {
+    private Price parsePrice(JSONObject price) {
         logger.info("parsePrice() method was called");
 
         int withTax = 0;
         int withoutTax = 0;
         String currencyCode = "";
 
-        JSONObject priceResult = new JSONObject();
+        Price priceResult = new Price();
 
         if (price.has("withTax")) {
             withTax = price.getInt("withTax");
         }
 
-        priceResult.put("withTax", withTax);
+        priceResult.setWithTax(withTax);
 
         if (price.has("withoutTax")) {
             withoutTax = price.getInt("withoutTax");
         }
 
-        priceResult.put("withoutTax", withoutTax);
+        priceResult.setWithoutTax(withoutTax);
 
         if (price.has("currencyCode")) {
             currencyCode = price.getString("currencyCode");
         }
 
-        priceResult.put("currency", currencyCode);
+        priceResult.setCurrency(currencyCode);
 
         return priceResult;
     }
 
-    private void parseName(JSONObject productResult, JSONObject attributes) {
+    private void parseName(Product productResult, JSONObject attributes) {
         logger.info("parseName() method was called");
 
         String name = "";
@@ -150,10 +150,10 @@ public class Parser {
             //no action needed
         }
 
-        productResult.put("name", name);
+        productResult.setName(name);
     }
 
-    private void parseBrandName(JSONObject productResult, JSONObject attributes) {
+    private void parseBrandName(Product productResult, JSONObject attributes) {
         logger.info("parseBrandName() method was called");
 
         String brandName = "";
@@ -164,10 +164,10 @@ public class Parser {
             //no action needed
         }
 
-        productResult.put("brandName", brandName);
+        productResult.setBrandName(brandName);
     }
 
-    private void parseColor(JSONObject productResult, JSONObject attributes) {
+    private void parseColor(Product productResult, JSONObject attributes) {
         logger.info("parseColor() method was called");
 
         try {
@@ -180,16 +180,16 @@ public class Parser {
                 }
             }
 
-            productResult.put("colors", colors);
+            productResult.setColors(colors);
         } catch (JSONException e) {
             //no action needed
         }
 
-        productResult.put("colors", new String[0]);
+        productResult.setColors(new String[0]);
 
     }
 
-    private void parseArticleId(JSONObject productResult, JSONObject productJSON) {
+    private void parseArticleId(Product productResult, JSONObject productJSON) {
         logger.info("parseArticleId() method was called");
 
         String articleId = "";
@@ -198,6 +198,6 @@ public class Parser {
             articleId = productJSON.getString("referenceKey");
         }
 
-        productResult.put("articleId", articleId);
+        productResult.setArticleId(articleId);
     }
 }

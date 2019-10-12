@@ -2,10 +2,12 @@ package com;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class WriterToFile {
 
@@ -18,7 +20,7 @@ public class WriterToFile {
         return amountOfProducts;
     }
 
-    public static void writeToFile(JSONArray content) throws IOException {
+    public static void writeToFile(List<Product> products) throws IOException {
         logger.info("writeToFile() was called");
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path, true))) {
@@ -27,16 +29,16 @@ public class WriterToFile {
                 bufferedWriter.append("[");
             }
 
-            for (int i = 0; i < content.length(); i++) {
+            for (Product product : products) {
                 if (amountOfProducts != 0) {
                     bufferedWriter.append(",");
                 }
 
-                bufferedWriter.append(content.getJSONObject(i).toString());
+                bufferedWriter.append(new JSONObject(product).toString());
                 amountOfProducts++;
             }
 
-            if (content.length() < RequestMaker.getNumberOfProductsByRequest()) {
+            if (products.size() < RequestMaker.getNumberOfProductsByRequest()) {
                 bufferedWriter.append("]");
             }
         } catch (IOException e) {
