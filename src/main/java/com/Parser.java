@@ -184,9 +184,6 @@ public class Parser {
         } catch (JSONException e) {
             //no action needed
         }
-
-        productResult.setColors(new String[0]);
-
     }
 
     private void parseArticleId(Product productResult, JSONObject productJSON) {
