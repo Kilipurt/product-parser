@@ -6,13 +6,30 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
 
     private Logger logger = Logger.getLogger(Parser.class);
     private RequestMaker requestMaker = new RequestMaker();
+
+    private static final String CURRENCY_CODE = "currencyCode";
+    private static final String REFERENCE_KEY = "referenceKey";
+    private static final String COLOR_DETAIL = "colorDetail";
+    private static final String PRICE_RANGE = "priceRange";
+    private static final String WITHOUT_TAX = "withoutTax";
+    private static final String ATTRIBUTES = "attributes";
+    private static final String SHOP_SIZE = "shopSize";
+    private static final String VARIANTS = "variants";
+    private static final String ENTITIES = "entities";
+    private static final String WITH_TAX = "withTax";
+    private static final String VALUES = "values";
+    private static final String LABEL = "label";
+    private static final String VALUE = "value";
+    private static final String BRAND = "brand";
+    private static final String NAME = "name";
+    private static final String MIN = "min";
+    private static final String MAX = "max";
 
     public void parse() throws Exception {
         logger.info("parse() method was called");
@@ -22,11 +39,11 @@ public class Parser {
         while (endFlag) {
             JSONObject responseJSON = requestMaker.doRequest();
 
-            if (!responseJSON.has("entities")) {
+            if (!responseJSON.has(ENTITIES)) {
                 break;
             }
 
-            JSONArray products = responseJSON.getJSONArray("entities");
+            JSONArray products = responseJSON.getJSONArray(ENTITIES);
 
             if (products.length() < RequestMaker.getNumberOfProductsByRequest()) {
                 endFlag = false;
@@ -36,7 +53,20 @@ public class Parser {
 
             for (int i = 0; i < products.length(); i++) {
                 try {
-                    result.add(parseProduct(products.getJSONObject(i)));
+                    JSONObject productJSON = products.getJSONObject(i);
+
+                    JSONObject attributes = productJSON.getJSONObject(ATTRIBUTES);
+                    JSONObject priceRange = productJSON.getJSONObject(PRICE_RANGE);
+
+                    result.add(new Product.Builder()
+                            .withBrandName(attributes.getJSONObject(BRAND).getJSONObject(VALUES).getString(LABEL))
+                            .withName(attributes.getJSONObject(NAME).getJSONObject(VALUES).getString(LABEL))
+                            .withMaxPrice(parsePrice(priceRange.getJSONObject(MAX)))
+                            .withMinPrice(parsePrice(priceRange.getJSONObject(MIN)))
+                            .withArticleId(productJSON.getString(REFERENCE_KEY))
+                            .withColors(parseColor(attributes))
+                            .withSizes(parseSizes(productJSON))
+                            .build());
                 } catch (RuntimeException e) {
                     logger.error("Product " + (WriterToFile.getAmountOfProducts() + i) + " was not extracted. "
                             + e.getMessage());
@@ -47,86 +77,54 @@ public class Parser {
         }
     }
 
-    private Product parseProduct(JSONObject productJSON) {
-        logger.info("parseProduct() method was called");
-
-        String articleId = productJSON.getString("referenceKey");
-        String[] sizes = parseSizes(productJSON);
-
-        JSONObject attributes = productJSON.getJSONObject("attributes");
-        String[] colors = parseColor(attributes);
-        String brandName = attributes.getJSONObject("brand").getJSONObject("values").getString("label");
-        String name = attributes.getJSONObject("name").getJSONObject("values").getString("label");
-
-        JSONObject priceRange = productJSON.getJSONObject("priceRange");
-        Price minPrice = parsePrice(priceRange.getJSONObject("min"));
-        Price maxPrice = parsePrice(priceRange.getJSONObject("max"));
-
-        return new Product.Builder()
-                .withArticleId(articleId)
-                .withName(name)
-                .withBrandName(brandName)
-                .withColors(colors)
-                .withMaxPrice(maxPrice)
-                .withMinPrice(minPrice)
-                .withSizes(sizes)
-                .build();
-    }
-
-    private String[] parseSizes(JSONObject productJSON) {
+    private Set<String> parseSizes(JSONObject productJSON) {
         logger.info("parseSizes() method was called");
 
-        List<String> sizes = new ArrayList<>();
-
-        JSONArray variants = productJSON.getJSONArray("variants");
+        JSONArray variants = productJSON.getJSONArray(VARIANTS);
+        Set<String> sizes = new HashSet<>();
 
         for (int j = 0; j < variants.length(); j++) {
-            JSONObject variant = variants.getJSONObject(j);
-
             try {
-                String size = variant.getJSONObject("attributes")
-                        .getJSONObject("shopSize")
-                        .getJSONObject("values")
-                        .getString("value");
+                String size = variants.getJSONObject(j)
+                        .getJSONObject(ATTRIBUTES)
+                        .getJSONObject(SHOP_SIZE)
+                        .getJSONObject(VALUES)
+                        .getString(VALUE);
 
-                if (!sizes.contains(size)) {
-                    sizes.add(size);
-                }
+                sizes.add(size);
             } catch (JSONException e) {
                 //no action needed
             }
         }
 
-        return sizes.toArray(new String[sizes.size()]);
+        return sizes;
     }
 
     private Price parsePrice(JSONObject price) {
         logger.info("parsePrice() method was called");
 
         Price priceResult = new Price();
-        priceResult.setWithTax(price.getInt("withTax"));
-        priceResult.setWithoutTax(price.getInt("withoutTax"));
-        priceResult.setCurrency(price.getString("currencyCode"));
+        priceResult.setWithTax(price.getInt(WITH_TAX));
+        priceResult.setWithoutTax(price.getInt(WITHOUT_TAX));
+        priceResult.setCurrency(price.getString(CURRENCY_CODE));
 
         return priceResult;
     }
 
-    private String[] parseColor(JSONObject attributes) {
+    private Set<String> parseColor(JSONObject attributes) {
         logger.info("parseColor() method was called");
 
-        List<String> colors = new ArrayList<>();
+        JSONArray colorsJSON = attributes.getJSONObject(COLOR_DETAIL).getJSONArray(VALUES);
+        Set<String> colors = new HashSet<>();
 
-        try {
-            JSONArray colorsJSON = attributes.getJSONObject("colorDetail").getJSONArray("values");
-
-            for (int k = 0; k < colorsJSON.length(); k++) {
-                colors.add(colorsJSON.getJSONObject(k).getString("label"));
+        for (int k = 0; k < colorsJSON.length(); k++) {
+            try {
+                colors.add(colorsJSON.getJSONObject(k).getString(LABEL));
+            } catch (JSONException e) {
+                //no action needed
             }
-
-        } catch (JSONException e) {
-            //no action needed
         }
 
-        return colors.toArray(new String[colors.size()]);
+        return colors;
     }
 }

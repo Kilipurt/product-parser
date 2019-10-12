@@ -1,10 +1,12 @@
 package com;
 
+import java.util.Set;
+
 public class Product {
 
     private String articleId;
-    private String[] colors;
-    private String[] sizes;
+    private Set<String> colors;
+    private Set<String> sizes;
     private String name;
     private String brandName;
     private Price minPrice;
@@ -18,19 +20,19 @@ public class Product {
         this.articleId = articleId;
     }
 
-    public String[] getColors() {
+    public Set<String> getColors() {
         return colors;
     }
 
-    public void setColors(String[] colors) {
+    public void setColors(Set<String> colors) {
         this.colors = colors;
     }
 
-    public String[] getSizes() {
+    public Set<String> getSizes() {
         return sizes;
     }
 
-    public void setSizes(String[] sizes) {
+    public void setSizes(Set<String> sizes) {
         this.sizes = sizes;
     }
 
@@ -84,12 +86,12 @@ public class Product {
             return this;
         }
 
-        public Builder withColors(String[] colors){
+        public Builder withColors(Set<String> colors){
             product.colors = colors;
             return this;
         }
 
-        public Builder withSizes(String[] sizes){
+        public Builder withSizes(Set<String> sizes){
             product.sizes = sizes;
             return this;
         }
@@ -112,6 +114,5 @@ public class Product {
         public Product build(){
             return product;
         }
-
     }
 }
