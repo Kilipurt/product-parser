@@ -65,4 +65,53 @@ public class Product {
     public void setMaxPrice(Price maxPrice) {
         this.maxPrice = maxPrice;
     }
+
+
+    public static class Builder {
+        private Product product;
+
+        public Builder() {
+            product = new Product();
+        }
+
+        public Builder withName(String name){
+            product.name = name;
+            return this;
+        }
+
+        public Builder withBrandName(String brandName){
+            product.brandName = brandName;
+            return this;
+        }
+
+        public Builder withColors(String[] colors){
+            product.colors = colors;
+            return this;
+        }
+
+        public Builder withSizes(String[] sizes){
+            product.sizes = sizes;
+            return this;
+        }
+
+        public Builder withArticleId(String articleId){
+            product.articleId = articleId;
+            return this;
+        }
+
+        public Builder withMinPrice(Price minPrice){
+            product.minPrice = minPrice;
+            return this;
+        }
+
+        public Builder withMaxPrice(Price maxPrice){
+            product.maxPrice = maxPrice;
+            return this;
+        }
+
+        public Product build(){
+            return product;
+        }
+
+    }
 }

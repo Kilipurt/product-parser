@@ -31,9 +31,9 @@ public class RequestMaker {
         logger.info("doRequest() method was called");
 
         String ssp = "//api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name|colorDetail),variants," +
-                "variants.attributes:key(shopSize|categoryShopFilterSizes|cup|cupsize|vendorSize|length|dimension3|" +
-                "sort),priceRange&filters[category]=20290&sortDir=desc&sortScore=category_scores&sortChannel=etkp&" +
-                "page=" + page + "&perPage=" + numberOfProductsByRequest + "&campaignKey=px&shopId=139";
+                "variants.attributes:key(shopSize),priceRange&filters[category]=20290&sortDir=desc&sortScore=" +
+                "category_scores&sortChannel=etkp&page=" + page + "&perPage=" + numberOfProductsByRequest +
+                "&campaignKey=px&shopId=139";
 
         HttpGet request = new HttpGet(new URI("https", ssp, null));
 
